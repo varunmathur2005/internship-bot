@@ -1,0 +1,60 @@
+filters:
+  seasons: [summer]
+  years: [2027]
+  require_target_year: true
+  countries: [United States, Canada, Remote]
+  include_keywords:
+    - software engineer
+    - software engineering
+    - software developer
+    - swe
+    - backend
+    - frontend
+    - full stack
+    - infrastructure
+    - platform
+  exclude_keywords:
+    - senior
+    - staff
+    - principal
+    - manager
+    - new grad
+  require_internship_word: true
+
+sources:
+  speedyapply:
+    enabled: true
+    urls:
+      - https://raw.githubusercontent.com/speedyapply/2027-SWE-College-Jobs/main/README.md
+      - https://raw.githubusercontent.com/speedyapply/2027-SWE-College-Jobs/main/INTERN_INTL.md
+
+  simplify:
+    enabled: true
+    # Switch this URL when Simplify launches its dedicated Summer 2027 repository.
+    url: https://raw.githubusercontent.com/SimplifyJobs/Summer2026-Internships/dev/README.md
+
+  # Add company boards without writing scraper code.
+  greenhouse:
+    # - company: Example
+    #   board_token: example
+    []
+  lever:
+    # - company: Example
+    #   site: example
+    []
+  ashby:
+    # - company: Example
+    #   board: Example
+    []
+
+  # Generic pages work best when jobs are ordinary links in server-rendered HTML.
+  pages:
+    # - company: Example
+    #   url: https://example.com/careers
+    #   link_selector: "a[href]"
+    []
+
+email:
+  subject_prefix: "Internship Bot"
+  send_empty_digest: false
+  max_jobs_per_email: 100
