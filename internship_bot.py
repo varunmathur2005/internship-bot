@@ -252,6 +252,16 @@ def send_email(subject: str, text: str, body: str) -> None:
         smtp.send_message(message)
 
 
+def load_config(config_path: str) -> dict:
+    path = Path(config_path)
+    if not path.exists() and config_path == "config.yaml":
+        fallback_path = Path("config.example.yaml")
+        if fallback_path.exists():
+            path = fallback_path
+    config = yaml.safe_load(path.read_text())
+    return config if isinstance(config, dict) else {}
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Find new Summer 2027 SWE internships and email them.")
     parser.add_argument("--config", default="config.yaml")
@@ -259,7 +269,7 @@ def main() -> int:
     parser.add_argument("--dry-run", action="store_true", help="Print matches without email or database writes")
     parser.add_argument("--send-test", action="store_true", help="Send a test email and exit")
     args = parser.parse_args()
-    config = yaml.safe_load(Path(args.config).read_text())
+    config = load_config(args.config)
     prefix = config.get("email", {}).get("subject_prefix", "Internship Bot")
     if args.send_test:
         subject, text, body = build_email([Job("Example", "Software Engineering Intern - Summer 2027", "Toronto, Canada", "https://example.com", "Test")], [], prefix)
