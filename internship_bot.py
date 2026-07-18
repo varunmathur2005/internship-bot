@@ -283,9 +283,17 @@ def main() -> int:
     db = init_db(Path(args.database))
     new_jobs = unseen(db, jobs)[: int(config.get("email", {}).get("max_jobs_per_email", 100))]
     if new_jobs or config.get("email", {}).get("send_empty_digest", False):
-        send_email(*build_email(new_jobs, errors, prefix))
+        required = ["SMTP_HOST", "SMTP_USERNAME", "SMTP_PASSWORD", "EMAIL_FROM", "EMAIL_TO"]
+        missing = [name for name in required if not os.getenv(name)]
+        if missing:
+            print("Skipping email due to missing environment variables: " + ", ".join(missing), file=sys.stderr)
+        else:
+            send_email(*build_email(new_jobs, errors, prefix))
         mark_seen(db, new_jobs)
-        print(f"Sent {len(new_jobs)} new jobs.")
+        if missing:
+            print(f"Skipped email for {len(new_jobs)} new jobs.")
+        else:
+            print(f"Sent {len(new_jobs)} new jobs.")
     else:
         print(f"No new jobs. Checked {len(jobs)} matching active jobs.")
     if errors:
