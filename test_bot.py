@@ -1,7 +1,9 @@
 import os
+import sys
 import unittest
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from unittest.mock import patch
 
 from internship_bot import Client, Job, build_email, load_config, location_allowed, matches, speedyapply_jobs
 
@@ -72,6 +74,29 @@ class BotTests(unittest.TestCase):
                     load_config("missing.yaml")
             finally:
                 os.chdir(original_cwd)
+
+    def test_main_skips_email_when_env_missing(self):
+        job = Job("Acme", "Software Engineer Intern - Summer 2027", "Toronto, Canada", "https://x.test/1", "Test")
+        with TemporaryDirectory() as temp_dir:
+            db_path = Path(temp_dir) / "jobs.db"
+            with patch("internship_bot.load_config", return_value={"email": {}}), \
+                    patch("internship_bot.collect", return_value=([job], [])), \
+                    patch("internship_bot.send_email") as mock_send_email, \
+                    patch.object(sys, "argv", ["internship_bot.py", "--database", str(db_path)]), \
+                    patch.dict(
+                        os.environ,
+                        {
+                            "SMTP_HOST": "",
+                            "SMTP_USERNAME": "",
+                            "SMTP_PASSWORD": "",
+                            "EMAIL_FROM": "",
+                            "EMAIL_TO": "",
+                        },
+                        clear=False,
+                    ):
+                from internship_bot import main
+                self.assertEqual(main(), 0)
+                mock_send_email.assert_not_called()
 
 
 if __name__ == "__main__":
